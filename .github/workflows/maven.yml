@@ -1,42 +1,17 @@
-name: CI Workflow for Docker Build
-
+name: Maven Build
 on:
   push:
-
+    branches:
+      - master
 jobs:
-  docker:
-    env:
-     appName: "docker-image"
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Set up JDK 11
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: maven
+          java-version: '17'
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.appName }}:latest
-      - name: Executing Kubectl command on Kubernetes Server Remotely
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-         host: ${{ secrets.HOST }}
-         username: ${{ secrets.USERNAME }}
-         password: ${{ secrets.PASSWORD }}
-         port: ${{ secrets.PORT }}
-         script: kubectl get nodes
+        run: mvn clean package
