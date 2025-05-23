@@ -15,4 +15,19 @@ jobs:
           java-version: '21'
       - name: Build with Maven
         run: mvn clean package
+name: Deploy to Server
+  uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+  with:
+    host: ${{ secrets.HOST }}
+    user: ${{ secrets.USERNAME }}
+    pass: ${{ secrets.PASSWORD }}
+    scp: |
+      ./target/*.war => /var/lib/tomcat9/webapps/
+name: Invoke Jenkins Deployment Job
+  uses: appleboy/jenkins-action@master
+  with:
+    url: "http://<JENKINS_SERVER>:8080"
+    user: "admin"
+    token: ${{ secrets.JENKINS_TOKEN }}
+    job: "TomcatDeployment"
 
